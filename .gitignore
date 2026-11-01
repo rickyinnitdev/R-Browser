@@ -1,0 +1,23 @@
+bin/
+obj/
+dist/
+assets/filters.txt
+*.user
+tools/lists/*.txt
+!tools/lists/r1-extra.txt
+shot*.png
+
+# Build outputs and packaged downloads
+**/bin/
+**/obj/
+/dist*/
+*.zip
+*.tar.gz
+*.7z
+*.log
+.vs/
+.env
+.env.*
+*.pfx
+*.p12
+*.pem

@@ -1,0 +1,50 @@
+! R1 hand-curated rules: anti-adblock, bait detection, common annoyances
+! Anti-adblock script hosts / services
+||fuckadblock.com^
+||blockadblock.com^
+||adblockdetector.com^
+||adblock-detect.com^
+||adblockdetection.com^
+||anti-adblock.com^
+||detectadblock.com^
+||adblock-detector.net^
+||blockadblock.js^
+||fuckadblock.js^
+||adblocker.js^
+! Common ad-wrapper containers (heuristic backstop, cosmetic)
+##[id^="adblock-notice"]
+##[class^="adblock-notice"]
+##[id*="adblock-warning"]
+##[class*="adblock-warning"]
+##[id*="adblocker-detected"]
+##[class*="adblocker-detected"]
+##[id*="adblock-detected"]
+##[class*="adblock-detected"]
+##[id*="antiadblock"]
+##[class*="antiadblock"]
+##[id*="anti-adblock"]
+##[class*="anti-adblock"]
+! Popups / interstitials / newsletter walls
+##[class*="newsletter-popup"]
+##[id*="newsletter-popup"]
+##[class*="subscribe-popup"]
+##[class*="paywall-overlay"]
+##[class*="cookie-wall"]
+! Cookie banners (opt-in aggressive cleanup controlled by Settings)
+##[class*="cookie-banner"]
+##[id*="cookie-banner"]
+##[class*="cookie-consent"]
+##[id*="cookie-consent"]
+##[class*="cmp-container"]
+##[id*="onetrust-banner-sdk"]
+! Floating video / sticky ad rails
+##[class*="sticky-ad"]
+##[id*="sticky-ad"]
+##[class*="floating-ad"]
+##[class*="adhesion"]
+! Sponsored blocks
+##[class*="sponsored-content"]
+##[data-ad-slot]
+##[data-ad-unit]
+##[data-ad-client]
+##ins.adsbygoogle

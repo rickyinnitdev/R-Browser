@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Adblock self-test</title>
+<style>
+  body { margin: 0; padding: 36px 40px; background: #0d1016; color: #e9eef8;
+         font: 14px/1.6 "Segoe UI Variable Text", "Segoe UI", sans-serif; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: #8b95a8; margin-bottom: 22px; }
+  .card { background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.09);
+          border-radius: 12px; padding: 16px 18px; max-width: 760px; margin-bottom: 14px; }
+  .ok { color: #6ee7b7; } .bad { color: #ff8a9a; }
+  code { color: #9db4ff; }
+  #bait { width: 300px; height: 250px; background: #1a1f2a; border: 1px dashed #333a48;
+          color: #667; display: grid; place-items: center; font-size: 12px; }
+</style>
+</head>
+<body>
+<h1>Ad-block self-test</h1>
+<div class="sub">Checks network blocking, bait spoofing, detector stubs and anti-adblock wall removal.</div>
+
+<div class="card" id="results"></div>
+<div class="card"><div style="color:#8b95a8;font-size:12px;margin-bottom:8px">bait element (should stay non-zero)</div>
+  <div id="bait" class="adsbygoogle">ad bait</div></div>
+
+<script src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"
+        onerror="log('network: ad script blocked', true)"
+        onload="log('network: ad script LOADED (not blocked)', false)"></script>
+
+<iframe src="https://googleads.g.doubleclick.net/pagead/ads?client=selftest" width="300" height="250" style="border:1px solid #333a48"></iframe>
+
+<div id="adblock-wall" style="display:none;position:fixed;inset:0;background:rgba(4,6,10,.92);z-index:99999;align-items:center;justify-content:center;flex-direction:column;backdrop-filter:blur(6px)">
+  <h2 style="font-size:26px">Please disable your ad blocker to continue</h2>
+  <p style="color:#9aa">Our content is funded by ads.</p>
+</div>
+
+<script>
+  const out = document.getElementById('results');
+  function log(text, ok) {
+    const d = document.createElement('div');
+    d.innerHTML = '<span class="' + (ok === undefined ? '' : ok ? 'ok' : 'bad') + '">' +
+      (ok === undefined ? '' : ok ? 'PASS ' : 'FAIL ') + '</span>' + text;
+    out.appendChild(d);
+  }
+
+  log('canRunAds = ' + window.canRunAds, window.canRunAds === true);
+  log('adsbygoogle stub = ' + (window.adsbygoogle ? 'present' : 'missing'), !!window.adsbygoogle);
+  log('FuckAdBlock stub = ' + (typeof window.FuckAdBlock), typeof window.FuckAdBlock === 'function');
+
+  setTimeout(function () {
+    const bait = document.getElementById('bait');
+    log('bait offsetHeight = ' + bait.offsetHeight, bait.offsetHeight > 0);
+
+    const wall = document.getElementById('adblock-wall');
+    wall.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    setTimeout(function () {
+      log('anti-adblock wall still present = ' + wall.isConnected, !wall.isConnected);
+      log('body overflow = ' + getComputedStyle(document.body).overflow, getComputedStyle(document.body).overflow !== 'hidden');
+    }, 2000);
+  }, 1200);
+</script>
+</body>
+</html>

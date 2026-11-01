@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>New tab</title>
+<link rel="stylesheet" href="pages.css">
+</head>
+<body>
+<div class="bg"></div>
+<div class="wrap">
+  <div class="brand">
+    <div class="orb"></div>
+    <h1>R <span>quiet browsing</span></h1>
+  </div>
+
+  <form class="search" id="f">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e9eef8" stroke-width="1.8" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.4 15.4 20 20"/></svg>
+    <input id="q" aria-label="Search the web or enter an address" autocomplete="off" spellcheck="false" placeholder="Search the web or enter an address">
+    <button type="submit">Go</button>
+  </form>
+
+  <div class="sites" id="sites"></div>
+
+  <div class="foot">
+    <div class="shield"><span class="dot"></span><span id="stats">Shields ready</span></div>
+    <div class="links">
+      <a href="#" data-act="openBookmarks">Bookmarks</a>
+      <a href="#" data-act="openHistory">History</a>
+      <a href="#" data-act="openDownloads">Downloads</a>
+      <a href="settings.html">Settings</a>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const api = window.chrome && window.chrome.webview;
+  const q = document.getElementById('q');
+  const sites = document.getElementById('sites');
+  const stats = document.getElementById('stats');
+
+  document.getElementById('f').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const v = q.value.trim();
+    if (v && api) api.postMessage({ r1: 'search', q: v });
+  });
+
+  document.querySelectorAll('[data-act]').forEach(function (el) {
+    el.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (api) api.postMessage({ r1: 'action', name: el.dataset.act });
+    });
+  });
+
+  function esc(s) {
+    return String(s || '').replace(/[&<>"']/g, function (c) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+    });
+  }
+
+  function render(list) {
+    sites.innerHTML = '';
+    (list || []).slice(0, 12).forEach(function (s) {
+      let host = '';
+      try { host = new URL(s.u).hostname.replace(/^www\./, ''); } catch (e) { host = s.u; }
+      const a = document.createElement('a');
+      a.className = 'site';
+      a.href = '#';
+      a.innerHTML = '<div class="fav">' + esc((host[0] || '?').toUpperCase()) + '</div>' +
+                    '<div class="t">' + esc(s.t || host) + '</div>' +
+                    '<div class="u">' + esc(host) + '</div>';
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (api) api.postMessage({ r1: 'goto', url: s.u });
+      });
+      sites.appendChild(a);
+    });
+  }
+
+  if (api) {
+    api.addEventListener('message', function (e) {
+      const d = e.data || {};
+      if (d.r1 !== 'home') return;
+      render(d.sites);
+      const n = d.blocked || 0;
+      stats.textContent = n > 0
+        ? n.toLocaleString() + ' trackers & ads blocked this session'
+        : 'Shields ready — ' + (d.rules || 0).toLocaleString() + ' rules loaded';
+      if (d.incognito) stats.textContent += ' · incognito';
+    });
+    api.postMessage({ r1: 'home' });
+  }
+
+  setTimeout(function () { q.focus(); }, 30);
+})();
+</script>
+</body>
+</html>

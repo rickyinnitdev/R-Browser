@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Settings — R Browser</title>
+<link rel="stylesheet" href="pages.css">
+</head>
+<body>
+<div class="bg"></div>
+<div class="wrap settings">
+  <div class="brand" style="margin-bottom:22px">
+    <div class="orb" style="width:32px;height:32px;border-radius:10px"></div>
+    <h1 style="font-size:22px">Settings</h1>
+  </div>
+  <p class="sub">Minimal by design. Nothing leaves this machine unless you load a page.</p>
+
+  <div class="card">
+    <div class="row">
+      <div>
+        <div class="label">Ad &amp; tracker blocking</div>
+        <div class="hint">Network-level filtering with the bundled EasyList / EasyPrivacy rule set. Requests are answered locally — nothing is proxied.</div>
+      </div>
+      <div class="switch" data-key="adblock"></div>
+    </div>
+    <div class="row">
+      <div>
+        <div class="label">Cosmetic filtering</div>
+        <div class="hint">Hides leftover ad slots, sponsored modules and sticky banners so the page looks clean, not just broken.</div>
+      </div>
+      <div class="switch" data-key="cosmetic"></div>
+    </div>
+    <div class="row">
+      <div>
+        <div class="label">Anti-adblock defence</div>
+        <div class="hint">Neutralises bait detection, stubs common detector libraries and removes "please disable your ad blocker" walls.</div>
+      </div>
+      <div class="switch" data-key="antiadblock"></div>
+    </div>
+    <div class="row">
+      <div>
+        <div class="label">Remove cookie banners</div>
+        <div class="hint">Also hides consent walls and newsletter interstitials.</div>
+      </div>
+      <div class="switch" data-key="cookies"></div>
+    </div>
+    <div class="row">
+      <div>
+        <div class="label">Encrypted DNS &amp; Wi-Fi protection</div>
+        <div class="hint">Encrypts DNS lookups via HTTPS (DoH) and enables Encrypted Client Hello (ECH). Blinds your Wi-Fi router, admin and ISP to what websites you visit. Needs a restart.</div>
+      </div>
+      <div class="switch" data-key="securedns"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div>
+        <div class="label">Sleep background tabs</div>
+        <div class="hint">Sleeps idle tabs after about 45 seconds. Tabs playing audio stay awake; restored tabs load when opened.</div>
+      </div>
+      <div class="switch" data-key="sleep"></div>
+    </div>
+    <div class="row">
+      <div>
+        <div class="label">Restore last session</div>
+        <div class="hint">Reopens your tabs next time R Browser starts.</div>
+      </div>
+      <div class="switch" data-key="restore"></div>
+    </div>
+    <div class="row">
+      <div>
+        <div class="label">Hardware acceleration</div>
+        <div class="hint">Smoother scrolling and video, but the graphics process costs roughly 100 MB. Off keeps R Browser lean. Needs a restart.</div>
+      </div>
+      <div class="switch" data-key="gpu"></div>
+    </div>
+    <div class="row">
+      <div>
+        <div class="label">Download acceleration (multi-stream)</div>
+        <div class="hint">Bypasses server speed limits on file hosts by opening parallel range streams directly to disk.</div>
+      </div>
+      <div class="switch" data-key="downloadaccel"></div>
+    </div>
+    <div class="row">
+      <div>
+        <div class="label">Vertical tabs (sidebar)</div>
+        <div class="hint">Display tabs in a vertical sidebar on the left instead of horizontal tabs across the top.</div>
+      </div>
+      <div class="switch" data-key="verticaltabs"></div>
+    </div>
+    <div class="row">
+      <div>
+        <div class="label">Side panel on left</div>
+        <div class="hint">Dock the Bookmarks, History and Shields side panel on the left side of the window.</div>
+      </div>
+      <div class="switch" data-key="sidepanelleft"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row" style="align-items:flex-start">
+      <div>
+        <div class="label">Filter lists</div>
+        <div class="hint" id="filterinfo">Loading…</div>
+      </div>
+      <div class="stat"><b id="rules">—</b><span>network rules</span></div>
+    </div>
+    <div class="buttons">
+      <button class="ghost" data-act="updateFilters">Update filter lists</button>
+      <button class="ghost" data-act="clearHistory">Clear history</button>
+      <button class="ghost" data-act="clearCookies">Clear cookies</button>
+      <button class="ghost" data-act="openFolder">Open data folder</button>
+    </div>
+    <div class="kv" id="whitelist"></div>
+  </div>
+
+  <div class="foot">
+    <div>R Browser · WebView2 runtime</div>
+    <div class="links"><a href="newtab.html">New tab</a></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const api = window.chrome && window.chrome.webview;
+
+  function apply(d) {
+    document.querySelectorAll('.switch').forEach(function (el) {
+      el.classList.toggle('on', !!d[el.dataset.key]);
+    });
+    const rules = document.getElementById('rules');
+    const info = document.getElementById('filterinfo');
+    rules.textContent = (d.rules || 0).toLocaleString();
+    info.textContent = (d.cosmeticRules || 0).toLocaleString() + ' cosmetic rules · ' +
+      (d.engineReady ? 'engine ready' : 'loading…') +
+      (d.updated ? ' · updated ' + d.updated : ' · bundled list');
+    const wl = document.getElementById('whitelist');
+    wl.textContent = (d.whitelist && d.whitelist.length)
+      ? 'Ads allowed on: ' + d.whitelist.join(', ')
+      : 'No sites allow-listed. Use the shield button in the toolbar to allow ads on a site.';
+  }
+
+  document.querySelectorAll('.switch').forEach(function (el) {
+    el.addEventListener('click', function () {
+      const on = !el.classList.contains('on');
+      el.classList.toggle('on', on);
+      if (api) api.postMessage({ r1: 'set', key: el.dataset.key, value: on });
+    });
+  });
+
+  document.querySelectorAll('[data-act]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      if (api) api.postMessage({ r1: 'action', name: el.dataset.act });
+      if (el.dataset.act === 'updateFilters') {
+        el.textContent = 'Updating…';
+        setTimeout(function () { if (api) api.postMessage({ r1: 'get' }); el.textContent = 'Update filter lists'; }, 2600);
+      }
+    });
+  });
+
+  if (api) {
+    api.addEventListener('message', function (e) {
+      const d = e.data || {};
+      if (d.r1 === 'settings') apply(d);
+    });
+    api.postMessage({ r1: 'get' });
+  }
+})();
+</script>
+</body>
+</html>

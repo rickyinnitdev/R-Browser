@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>RBrowser</AssemblyName>
+    <RootNamespace>R1</RootNamespace>
+    <AssemblyTitle>R Browser</AssemblyTitle>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <TieredPGO>true</TieredPGO>
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GirCore.Gtk-4.0" Version="0.8.1" />
+    <PackageReference Include="GirCore.WebKit-6.0" Version="0.8.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Compile shared Core components directly -->
+    <Compile Include="..\Core\AppState.cs" Link="Core\AppState.cs" />
+    <Compile Include="..\Core\FilterEngine.cs" Link="Core\FilterEngine.cs" />
+    <Compile Include="..\Core\InjectedScripts.cs" Link="Core\InjectedScripts.cs" />
+    <Compile Include="..\Core\Log.cs" Link="Core\Log.cs" />
+    <Compile Include="..\Core\SegmentedDownloader.cs" Link="Core\SegmentedDownloader.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="..\assets\filters.dat" Link="assets\filters.dat" />
+  </ItemGroup>
+
+  <Target Name="CopyAssets" AfterTargets="Build">
+    <ItemGroup>
+      <R1Assets Include="$(MSBuildProjectDirectory)\..\assets\*.html;$(MSBuildProjectDirectory)\..\assets\*.css" />
+    </ItemGroup>
+    <Copy SourceFiles="@(R1Assets)" DestinationFolder="$(OutDir)assets" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>
